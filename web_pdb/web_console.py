@@ -98,18 +98,19 @@ class WebConsole(object):
     """
     A file-like class for exchanging data between PDB and the web-UI
     """
-    def __init__(self, host, port, debugger):
+    def __init__(self, host, port, debugger, start_server=True):
         self._debugger = weakref.proxy(debugger)
         self._console_history = ThreadSafeBuffer('')
         self._frame_data = ThreadSafeBuffer()
         self._stop_all = Event()
-        self._server_thread = Thread(target=self._run_server, args=(host, port))
-        self._server_thread.daemon = True
-        logging.critical(
-            'Web-PDB: starting web-server on {0}:{1}...'.format(
-                gethostname(), port)
-        )
-        self._server_thread.start()
+        if start_server:
+            self._server_thread = Thread(target=self._run_server, args=(host, port))
+            self._server_thread.daemon = True
+            logging.critical(
+                'Web-PDB: starting web-server on {0}:{1}...'.format(
+                    gethostname(), port)
+            )
+            self._server_thread.start()
 
     @property
     def seekable(self):

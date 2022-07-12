@@ -54,7 +54,7 @@ class WebPdb(Pdb):
     active_instance = None
     null = object()
 
-    def __init__(self, host='', port=5555, patch_stdstreams=False):
+    def __init__(self, host='', port=5555, patch_stdstreams=False, start_server=True):
         """
         :param host: web-UI hostname or IP-address
         :type host: str
@@ -68,7 +68,7 @@ class WebPdb(Pdb):
         if port == -1:
             random.seed()
             port = random.randint(32768, 65536)
-        self.console = WebConsole(host, port, self)
+        self.console = WebConsole(host, port, self, start_server)
         Pdb.__init__(self, stdin=self.console, stdout=self.console)
         # Borrowed from here: https://github.com/ionelmc/python-remote-pdb
         self._backup = []
@@ -272,7 +272,7 @@ def set_trace(host='', port=5555, patch_stdstreams=False):
     """
     pdb = WebPdb.active_instance
     if pdb is None:
-        pdb = WebPdb(host, port, patch_stdstreams)
+        pdb = WebPdb(host, port, patch_stdstreams, start_server=False)
     else:
         # If the debugger is still attached reset trace to a new location
         pdb.remove_trace()
