@@ -51,7 +51,6 @@ class WebPdb(Pdb):
     It provides a web-interface for Python's built-in PDB debugger
     with extra convenience features.
     """
-    active_instance = None
     null = object()
 
     def __init__(self, host='', port=5555, patch_stdstreams=False, start_server=True):
@@ -83,7 +82,6 @@ class WebPdb(Pdb):
             ):
                 self._backup.append((name, getattr(sys, name)))
                 setattr(sys, name, self.console)
-        WebPdb.active_instance = self
 
     def do_quit(self, arg):
         """
@@ -95,7 +93,6 @@ class WebPdb(Pdb):
         self.console.writeline('*** Aborting program ***\n')
         self.console.flush()
         self.console.close()
-        WebPdb.active_instance = None
         return Pdb.do_quit(self, arg)
 
     do_q = do_exit = do_quit
@@ -167,7 +164,6 @@ class WebPdb(Pdb):
             if not self.console.closed:
                 self.console.flush()
                 self.console.close()
-                WebPdb.active_instance = None
         return ret
 
     def get_current_frame_data(self):
@@ -270,7 +266,7 @@ def set_trace(host='', port=5555, patch_stdstreams=False):
         streams to the web-UI.
     :type patch_stdstreams: bool
     """
-    pdb = WebPdb.active_instance
+    pdb = None
     if pdb is None:
         pdb = WebPdb(host, port, patch_stdstreams, start_server=False)
     else:
@@ -318,7 +314,7 @@ def post_mortem(tb=None, host='', port=5555, patch_stdstreams=False):
     if tb is None:
         raise ValueError('A valid traceback must be passed if no '
                          'exception is being handled')
-    pdb = WebPdb.active_instance
+    pdb = None
     if pdb is None:
         pdb = WebPdb(host, port, patch_stdstreams)
     else:
